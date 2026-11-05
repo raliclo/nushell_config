@@ -1,7 +1,12 @@
 # Authors / 核心作者 : 
 # [Ralic Lo (ralic.lo@gmail.com)
 
-$env.Path = ($env.Path | prepend '~\scoop\apps\msys2\current\usr\bin')
+$env.Path = ($env.Path | prepend '~\scoop\apps\msys2\current\usr\bin' 
+    | prepend '~\scoop\apps\msys2\current\usr\bin\usr\sbin' 
+    | prepend '~\scoop\apps\python\current\python.exe'
+    | prepend '~\.cargo\bin' 
+    | prepend '~\.local\bin' 
+)
 $env.config.buffer_editor = ["code", "-w"]
 # $env.config.buffer_editor = "nano"
 
@@ -32,10 +37,10 @@ $env.LoginDay = (date now | format date "%Y-%m-%d")
 # 🚀 0. STARTUP SCRIPT MANAGEMENT (HOISTING) / 啟動腳本生命週期管理
 # ==============================================================================
 
-def "start_up@begin" [] {
+def startup-begin [] {
     print "[Info] Running boot scripts... / 正在執行初始引導腳本..."
 }
-start_up@begin
+startup-begin
 
 
 # ==============================================================================
@@ -102,22 +107,22 @@ def cgrep [...args: string] {
 # ==============================================================================
 
 def nanoTimeElapsed [--command: closure] {
-    let start_time = (date now | into int)
+    let starttime = (date now | into int)
     do $command
     let end_time = (date now | into int)
     # 強制將相減結果轉換並保留為整數
-    let elapsed_ns = ($end_time - $start_time) | into int
+    let elapsed_ns = ($end_time - $starttime) | into int
     print $"==> Process took: ($elapsed_ns) 奈秒/nanoseconds"
 }
 
 def ffilter [] {
-    lines | str replace -a "'" "\\'" | str replace -a '"' '\\"' | str replace -a ' ' '\\ '
+    lines | str replace --regex --all "['|\"]" "\\'" | str replace --all ' ' '\\ '
 }
 
 # ==============================================================================
 # 🏁 啟動腳本結尾初始化
 # ==============================================================================
-def "start_up@end" [] {
+def startup-end [] {
     $env.MAKEJOBS = "-j16"
 }
-start_up@end
+startup-end
