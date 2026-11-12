@@ -60,41 +60,35 @@ $env.PROMPT_COMMAND = { ||
 # 同步至 sudo 階段變數
 $env.SUDO_PS = $env.PROMPT_COMMAND
 
-
 # ==============================================================================
 # 📂 DIRECTORY NAVIGATION ENHANCEMENTS / 目錄導覽功能增強
 # ==============================================================================
 
-# 在 Nushell 中，若要覆寫 cd 行為通常建議透過自訂指令或包裝器處理
-# 這裡建立一個簡易的 cd 替代指令來記錄上一個路徑
 export-env {
-    $env.prevfolder = (pwd)
+    # 記錄開啟此終端機視窗時的初始登入目錄
     $env.termfolder = (pwd)
 }
 
+# 瞬間返回開啟此終端機視窗時的初始登入目錄
+def --env orig [] {
+    cd $env.termfolder
+    ls
+}
+
+# 切換回上一個目錄（原生支援 cd -，無論先前是用 cd 或其他指令移動，並支援反覆 toggle）
+def --env prev [] {
+    cd -
+    ls
+}
+
+# 若仍習慣使用 mycd，亦可保留或包裝原生 cd
 def --env mycd [target?: string] {
-    $env.prevfolder = (pwd)
     if ($target == null) {
         cd ~
     } else {
         cd $target
     }
     ls
-}
-
-# 瞬間返回開啟此終端機視窗時的初始登入目錄
-def --env orig [] {
-    mycd $env.termfolder
-}
-
-# 切換回上一個記錄的目錄
-def --env prev [] {
-    mycd $env.prevfolder
-}
-
-# Color grep command for better visibility of search results
-def cgrep [...args: string] {
-    grep --color=always ...$args
 }
 
 # ==============================================================================
